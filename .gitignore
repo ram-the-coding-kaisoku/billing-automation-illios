@@ -1,0 +1,12 @@
+# Client and provider configuration may contain private account information.
+billing_config.json
+
+# Generated billing reports, logs, and debug captures.
+billing_reports/
+
+# Python cache files.
+__pycache__/
+*.py[cod]
+
+# Local Node.js dependencies.
+node_modules/
