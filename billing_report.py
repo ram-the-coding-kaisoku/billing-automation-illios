@@ -1790,6 +1790,12 @@ def build_total_change_observation(client, provider, table_html):
     }
 
 
+def format_observation_amount(amount, provider):
+    """Format an observation amount in the provider's billing currency."""
+    currency_symbol = "₹" if provider in ("GCP", "Azure") else "$"
+    return f"{currency_symbol}{amount:.2f}"
+
+
 def render_observation_table(observations):
     """Render structured billing observations as an Outlook-friendly HTML table."""
     headers = (
@@ -1819,7 +1825,10 @@ def render_observation_table(observations):
                 f"{observation['previous_date'].isoformat()} to "
                 f"{observation['latest_date'].isoformat()}"
             ),
-            f"${observation['total_increase']:.2f}",
+            format_observation_amount(
+                observation["total_increase"],
+                observation["provider"],
+            ),
         )
         shared_cells = "".join(
             f'<td rowspan="{len(services)}" style="border:1px solid #bbb;'
@@ -1832,7 +1841,10 @@ def render_observation_table(observations):
             service_values = (
                 service_name,
                 (
-                    f"${service_increase:.2f}"
+                    format_observation_amount(
+                        service_increase,
+                        observation["provider"],
+                    )
                     if service_increase is not None
                     else "-"
                 ),
@@ -1951,8 +1963,8 @@ def open_outlook_draft(report_sections, observations):
             observation_html = render_observation_table(observations)
         else:
             observation_html = (
-                "<p>No client total increased by more than $1.00 "
-                "compared with the previous day.</p>"
+                "<p>No client total increased by more than 1.00 in its "
+                "billing currency compared with the previous day.</p>"
             )
 
         mail.HTMLBody = f"""
